@@ -1,33 +1,48 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import apiClient from '../../api';
 
-function Detail() {
+function PokemonDetails() {
   const { id } = useParams();
   const [pokemon, setPokemon] = useState(null);
 
   useEffect(() => {
-    const getDetail = async () => {
-      const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-      const data = await response.json();
-      setPokemon(data);
+    const fetchPokemonDetails = async () => {
+      try {
+        const response = await apiClient.get(`/pokemon/${id}`);
+        setPokemon(response.data);
+      } catch (error) {
+        console.error('Error fetching Pokémon details:', error);
+      }
     };
-    getDetail();
+
+    fetchPokemonDetails();
   }, [id]);
 
-  if (!pokemon) return <p>Загрузка...</p>;
+  if (!pokemon) {
+    return <p className="text-center mt-5">Loading...</p>;
+  }
 
   return (
-    <div className="container mt-5">
-      <h2 className="text-center mb-4">{pokemon.name}</h2>
-      <div className="text-center">
-        <img src={pokemon.sprites.front_default} alt={pokemon.name} />
-        <p>Рост: {pokemon.height}</p>
-        <p>Вес: {pokemon.weight}</p>
-        <p>Способности: {pokemon.abilities.map(a => a.ability.name).join(', ')}</p>
-        <Link to="/" className="btn btn-primary">Назад</Link>
+    <div className="container d-flex justify-content-center mt-5">
+      <div className="card shadow-lg" style={{ width: '24rem' }}>
+        <img
+          src={pokemon.sprites.front_default}
+          className="card-img-top"
+          alt={pokemon.name}
+        />
+        <div className="card-body">
+          <h5 className="card-title text-capitalize">{pokemon.name}</h5>
+          <p className="card-text">
+            Height: {pokemon.height} <br />
+            Weight: {pokemon.weight} <br />
+            Abilities: {pokemon.abilities.map(a => a.ability.name).join(', ')}
+          </p>
+          <Link to="/" className="card-link">Back</Link>
+        </div>
       </div>
     </div>
   );
 }
 
-export default Detail;
+export default PokemonDetails;
